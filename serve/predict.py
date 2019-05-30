@@ -11,7 +11,6 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data
 
-
 from model import LSTMClassifier
 
 from utils import review_to_words, convert_and_pad
@@ -71,8 +70,9 @@ def predict_fn(input_data, model):
     #         data_X   - A sequence of length 500 which represents the converted review
     #         data_len - The length of the review
     
-    # Assuming input_data is a review in text
-    data_X, data_len = convert_and_pad(model.word_dict, input_data)
+    # Assuming input_data is a single review / sentence in text
+    data_X = review_to_words(input_data)
+    data_X, data_len = convert_and_pad(model.word_dict, data_X)
 
     # Using data_X and data_len we construct an appropriate input tensor. Remember
     # that our model expects input data of the form 'len, review[500]'.
@@ -88,8 +88,8 @@ def predict_fn(input_data, model):
     # TODO: Compute the result of applying the model to the input data. The variable `result` should
     #       be a numpy array which contains a single integer which is either 1 or 0
     
-    output = model(data)
-    
-    result = np.array(int(output))
+    result = model(data) # This is a tensor
+    result = result.detach().numpy() # Turning it into an array
+    result = round(float(result))
 
     return result
